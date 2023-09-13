@@ -7,6 +7,69 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-        
+        <!--Main Grid Column Definitions-->
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="3*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="8*"/>
+        </Grid.ColumnDefinitions>
+
+        <!--First Column-->
+        <Grid Grid.Column="0">
+            <!--Row Definition for First Column-->
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Sine Wave Managment and Playback -->
+            
+
+            <!-- Frequency Adjustments -->
+            
+
+            <!-- Magnitude Adjustments -->
+            
+
+            <!-- Phase Adjustments -->
+            
+
+            <!-- Static Injection -->
+            
+
+        </Grid>
+
+        <!--Second Column-->
+        <Grid Grid.Column="1">
+            <!--Row Definitions For Second Column-->
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Preview Zoom Adjustments -->
+            
+
+            <!-- Signal Duration Adjustments -->
+            
+        </Grid>
+
+        <!--Third Column-->
+        <Grid Grid.Column="2">
+            <!--Row Definitions For Third Column-->
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!--Time Domain Graph-->
+            
+
+            <!--Frequency Domain Graph-->
+            
+        </Grid>
     </Grid>
 </Window>
