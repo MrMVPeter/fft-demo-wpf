@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:fft_demo_wpf"
+        xmlns:oxy="clr-namespace:OxyPlot.Wpf;assembly=OxyPlot.Wpf"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
@@ -26,16 +27,32 @@
             </Grid.RowDefinitions>
 
             <!-- Sine Wave Managment and Playback -->
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <ListBox x:Name="sineWaveComponentList" SelectionChanged="SineWaveComponentList_SelectionChanged" Grid.Column="0"/>
+                <Grid Grid.Column="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Button Content="Add" Click="AddComponent_Click" Grid.Row="0"/>
+                    <Button Content="Delete" Click="DeleteComponent_Click" Grid.Row="1"/>
+                </Grid>
+            </Grid>
             
 
             <!-- Frequency Adjustments -->
-            
+            <Slider x:Name="frequencySlider" Minimum="1" Maximum="1000" Value="1" TickFrequency="1" Grid.Row="1" IsSnapToTickEnabled="True"/>
+
 
             <!-- Magnitude Adjustments -->
-            
+            <Slider x:Name="magnitudeSlider" Minimum="0" Maximum="5" Value="1" TickFrequency="0.1" Grid.Row="2"/>
 
             <!-- Phase Adjustments -->
-            
+            <Slider x:Name="phaseSlider" Minimum="0" Maximum="10" Value="0" TickFrequency="0.1" Grid.Row="3"/>
 
             <!-- Static Injection -->
             
@@ -54,7 +71,9 @@
             
 
             <!-- Signal Duration Adjustments -->
-            
+
+            <Slider x:Name="durationSlider" Minimum="0.001" Maximum="0.5" Value="0.5" TickFrequency="0.1" Grid.Row="1" Orientation="Vertical"/>
+
         </Grid>
 
         <!--Third Column-->
@@ -66,10 +85,16 @@
             </Grid.RowDefinitions>
 
             <!--Time Domain Graph-->
-            
+            <Grid Grid.Row="0">
+                <oxy:PlotView Name="timeDomainView" />
+            </Grid>
+
 
             <!--Frequency Domain Graph-->
-            
+            <Grid Grid.Row="1">
+                <oxy:PlotView Name="frequencyDomainView" />
+            </Grid>
+
         </Grid>
     </Grid>
 </Window>
