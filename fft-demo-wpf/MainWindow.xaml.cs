@@ -14,14 +14,15 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using OxyPlot;
 using OxyPlot.Series;
-using System.Runtime.InteropServices;
+using MathNet.Numerics;
+using MathNet.Numerics.IntegralTransforms;
 
 namespace fft_demo_wpf
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : System.Windows.Window
     {
         public List<SineWaveComponent> sineWaveComponents = new List<SineWaveComponent>();
         public double SignalDuration { get; set; } = 0.5;
@@ -163,7 +164,7 @@ namespace fft_demo_wpf
             foreach (var component in sineWaveComponents)
             {
                 var series = new LineSeries { Title = $"Frequency: {component.Frequency:F1} Hz" };
-                series.Color = OxyColor.FromArgb(10, 0, 0 ,0);
+                series.Color = OxyColor.FromArgb(10, 0, 0, 0);
 
                 for (double x = 0; x <= SignalDuration; x += 1.0 / 4000.0)
                 {
@@ -196,8 +197,46 @@ namespace fft_demo_wpf
 
             // Update the plot
             timeDomainView.InvalidatePlot();
+
+            // Create time-domain data array
+            double[] timeDomainData = sumOfAllComponents.Values.ToArray();
+
+            // Perform FFT
+            PerformFFTWithMathNet(timeDomainData);
         }
 
+        public void PerformFFTWithMathNet(double[] timeDomainData)
+        {
+            // Convert to MathNet Numerics data type
+            var complexNumbers = timeDomainData.Select(t => new Complex32((float)t, 0)).ToArray();
+
+            // Perform FFT using MathNet.Numerics
+            Fourier.Forward(complexNumbers, FourierOptions.Default);
+
+            // Convert the results to a format suitable for your plotting library
+            var frequencyDomainData = complexNumbers.Select(c => c.Magnitude).ToArray();
+
+            // Convert float[] to double[]
+            double[] frequencyDomainDataDouble = Array.ConvertAll(frequencyDomainData, x => (double)x);
+
+            // Update your frequency-domain plot
+            UpdateFrequencyDomainGraph(frequencyDomainDataDouble);
+        }
+
+        private void UpdateFrequencyDomainGraph(double[] frequencyData)
+        {
+            var plotModel = frequencyDomainView.Model;
+            var series = new LineSeries { Title = "FFT Result" };
+
+            for (int i = 0; i < frequencyData.Length; i++) // We only need half of the array
+            {
+                series.Points.Add(new DataPoint(i / SignalDuration, frequencyData[i]));
+            }
+
+            plotModel.Series.Clear();
+            plotModel.Series.Add(series);
+            frequencyDomainView.InvalidatePlot();
+        }
     }
     public class SineWaveComponent
     {
@@ -209,11 +248,5 @@ namespace fft_demo_wpf
         {
             return $"F:{Frequency:F1}, M{Magnitude:F1}, P{Phase:F1}";
         }
-    }
-
-    public static class FFTWInterop
-    {
-        [DllImport("libfftw3-3-x64.ddl", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr fftw_plan_dft_1d(int n, IntPtr input, IntPtr output, int sign, uint flags);
     }
 }

@@ -45,7 +45,7 @@
             
 
             <!-- Frequency Adjustments -->
-            <Slider x:Name="frequencySlider" Minimum="1" Maximum="1000" Value="1" TickFrequency="1" Grid.Row="1" IsSnapToTickEnabled="True"/>
+            <Slider x:Name="frequencySlider" Minimum="0" Maximum="1000" Value="1" TickFrequency="1" Grid.Row="1" IsSnapToTickEnabled="True"/>
 
 
             <!-- Magnitude Adjustments -->
@@ -72,7 +72,7 @@
 
             <!-- Signal Duration Adjustments -->
 
-            <Slider x:Name="durationSlider" Minimum="0.001" Maximum="0.5" Value="0.5" TickFrequency="0.1" Grid.Row="1" Orientation="Vertical"/>
+            <Slider x:Name="durationSlider" Minimum="0.001" Maximum="0.2" Value="0.1" TickFrequency="0.1" Grid.Row="1" Orientation="Vertical"/>
 
         </Grid>
 
