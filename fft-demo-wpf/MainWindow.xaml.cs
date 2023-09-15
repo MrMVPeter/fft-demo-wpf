@@ -16,6 +16,8 @@ using OxyPlot;
 using OxyPlot.Series;
 using MathNet.Numerics;
 using MathNet.Numerics.IntegralTransforms;
+using OxyPlot.Axes;
+using System.ComponentModel;
 
 namespace fft_demo_wpf
 {
@@ -24,59 +26,124 @@ namespace fft_demo_wpf
     /// </summary>
     public partial class MainWindow : System.Windows.Window
     {
-        public List<SineWaveComponent> sineWaveComponents = new List<SineWaveComponent>();
-        public double SignalDuration { get; set; } = 0.5;
+        // List of Individual Wave Components
+        public static List<SineWaveComponent> sineWaveComponents = new List<SineWaveComponent>();
+
+        // Contains Samples of a waveform defined as the sum of each individual wave component
+        public static Dictionary<double, double> sumOfWavesSamples = new Dictionary<double, double>();
+        public static double SignalDuration { get; set; } = 0.5;
+        public static double SignalProportionVisible { get; set; } = 0.1;
+        public static double SignalNoise { get; set; } = 0.0;
+
+        private bool isNewComponentSelected = false;
+
+        public static int sampleRate = 8000;
         public MainWindow()
         {
             InitializeComponent();
 
             // Time-Domain Graph
             PlotModel timeDomainModel = new PlotModel { Title = "Time-Domain" };
+            var timeXAxis = new LinearAxis
+            {
+                Position = AxisPosition.Bottom,
+                Title = "Time (seconds)",
+                Minimum = 0
+            };
+            var timeYAxis = new LinearAxis
+            {
+                Position = AxisPosition.Left,
+                Title = "Magnitude"
+            };
+            timeDomainModel.Axes.Add(timeXAxis);
+            timeDomainModel.Axes.Add(timeYAxis);
             timeDomainView.Model = timeDomainModel;
 
             //Freq-Domain-Graph
             PlotModel frequencyDomainModel = new PlotModel { Title = "Frequency-Domain" };
-            frequencyDomainModel.Series.Add(new LineSeries { Title = "Series 2", Points = { new DataPoint(0, 10), new DataPoint(10, 0) } });
+            var frequencyXAxis = new LinearAxis
+            {
+                Position = AxisPosition.Bottom,
+                Title = "Frequency (Hz)",
+                Minimum = 0,
+                Maximum = 1000
+            };
+            var frequencyYAxis = new LinearAxis
+            {
+                Position = AxisPosition.Left,
+                Title = "Magnitude",
+                Minimum = 0,
+                Maximum = 5
+            };
+            frequencyDomainModel.Axes.Add(frequencyXAxis);
+            frequencyDomainModel.Axes.Add(frequencyYAxis);
             frequencyDomainView.Model = frequencyDomainModel;
-
             
-            sineWaveComponents.Add(new SineWaveComponent { Frequency = 1, Magnitude = 1, Phase = 0 });
-            sineWaveComponents.Add(new SineWaveComponent { Frequency = 2, Magnitude = 1, Phase = 0 });
+            sineWaveComponents.Add(new SineWaveComponent { Frequency = 250, Magnitude = 2, Phase = 0 });
             sineWaveComponentList.ItemsSource = sineWaveComponents;
+            sineWaveComponentList.SelectedItem = sineWaveComponents[0];
 
             frequencySlider.ValueChanged += FrequencySlider_ValueChanged;
             magnitudeSlider.ValueChanged += MagnitudeSlider_ValueChanged;
             phaseSlider.ValueChanged += PhaseSlider_ValueChanged;
             durationSlider.ValueChanged += DurationSlider_ValueChanged;
-            UpdateTimeDomainWaveForm();
+            proportionVisibleSlider.ValueChanged += ProportionVisible_ValueChanged;
+            noiseSlider.ValueChanged += NoiseSlider_ValueChanged;
+            UpdateSelectedComponent();
+            RenderTimeDomainWaveForm();
         }
 
         private void FrequencySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            UpdateSelectedComponent();
-            UpdateTimeDomainWaveForm();
+            if (!isNewComponentSelected)
+            {
+                UpdateSelectedComponent();
+                RenderTimeDomainWaveForm();
+            }
         }
 
         private void MagnitudeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            UpdateSelectedComponent();
-            UpdateTimeDomainWaveForm();
+            if (!isNewComponentSelected)
+            {
+                UpdateSelectedComponent();
+                RenderTimeDomainWaveForm();
+            }
         }
 
         private void PhaseSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            UpdateSelectedComponent();
-            UpdateTimeDomainWaveForm();
+            if (!isNewComponentSelected)
+            {
+                UpdateSelectedComponent();
+                RenderTimeDomainWaveForm();
+            }
         }
 
         private void DurationSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             UpdateGlobalProperties();
-            UpdateTimeDomainWaveForm();
+            UpdateSelectedComponent();
+            RenderTimeDomainWaveForm();
+        }
+        private void ProportionVisible_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            UpdateGlobalProperties();
+            UpdateSelectedComponent();
+            RenderTimeDomainWaveForm();
+        }
+        private void NoiseSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            UpdateGlobalProperties();
+            UpdateSelectedComponent();
+            RenderTimeDomainWaveForm();
         }
 
         private void SineWaveComponentList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            // flag to wave-component values changing during new selection
+            isNewComponentSelected = true;
+
             var selectedComponent = sineWaveComponentList.SelectedItem as SineWaveComponent;
             if (selectedComponent != null)
             {
@@ -84,14 +151,17 @@ namespace fft_demo_wpf
                 magnitudeSlider.Value = selectedComponent.Magnitude;
                 phaseSlider.Value = selectedComponent.Phase;
             }
+
+            // Reset flag
+            isNewComponentSelected = false;
         }
 
         private void AddComponent_Click(object sender, RoutedEventArgs e)
         {
             SineWaveComponent newComponent = new SineWaveComponent
             {
-                Frequency = 1,
-                Magnitude = 1,
+                Frequency = 250,
+                Magnitude = 2,
                 Phase = 0
             };
 
@@ -105,7 +175,7 @@ namespace fft_demo_wpf
             sineWaveComponentList.SelectedItem = newComponent;
 
             // Update the graph to include the new component
-            UpdateTimeDomainWaveForm();
+            RenderTimeDomainWaveForm();
         }
 
         private void DeleteComponent_Click(object sender, RoutedEventArgs e)
@@ -123,7 +193,7 @@ namespace fft_demo_wpf
                 sineWaveComponentList.Items.Refresh();
 
                 // Update the graph to remove the component
-                UpdateTimeDomainWaveForm();
+                RenderTimeDomainWaveForm();
             }
             else
             {
@@ -136,6 +206,8 @@ namespace fft_demo_wpf
         private void UpdateGlobalProperties()
         {
             SignalDuration = durationSlider.Value;
+            SignalProportionVisible = proportionVisibleSlider.Value;
+            SignalNoise = noiseSlider.Value;
         }
 
         private void UpdateSelectedComponent()
@@ -148,61 +220,93 @@ namespace fft_demo_wpf
                 selectedComponent.Phase = phaseSlider.Value;
                 sineWaveComponentList.Items.Refresh();
             }
+            UpdateWaveComponentSamples(selectedComponent);
+            ComputeSumOfSamples();
         }
 
-        private void UpdateTimeDomainWaveForm()
+        private void RenderTimeDomainWaveForm()
         {
             var plotModel = timeDomainView.Model;
-
-            // Step 1: Clear existing Series
             plotModel.Series.Clear();
 
-            // Placeholder for sum of all components at each point
-            Dictionary<double, double> sumOfAllComponents = new Dictionary<double, double>();
-
-            // Step 2: Plot Individual Components
+            // Plot Individual Components
             foreach (var component in sineWaveComponents)
             {
                 var series = new LineSeries { Title = $"Frequency: {component.Frequency:F1} Hz" };
                 series.Color = OxyColor.FromArgb(10, 0, 0, 0);
 
-                for (double x = 0; x <= SignalDuration; x += 1.0 / 4000.0)
-                {
-                    double y = component.Magnitude * Math.Sin((2 * Math.PI * component.Frequency * x) + component.Phase);
-                    series.Points.Add(new DataPoint(x, y));
-
-                    // Add this component's value to the sum
-                    if (sumOfAllComponents.ContainsKey(x))
+                // For each key/value pair in the sample for that component
+                foreach (var x in component.WaveComponentSamples)
+                { 
+                    // Stop plotting points past the proportion we want visible
+                    if (x.Key > SignalDuration * SignalProportionVisible)
                     {
-                        sumOfAllComponents[x] += y;
+                        break;
                     }
-                    else
-                    {
-                        sumOfAllComponents[x] = y;
-                    }
+                    series.Points.Add(new DataPoint(x.Key, x.Value));
                 }
-
                 plotModel.Series.Add(series);
             }
 
-            // Step 3: Plot Sum of Components
-            var sumSeries = new LineSeries { Title = "Sum of Components", LineStyle = LineStyle.Solid };
+            // Plot Aggregate Waveform
+            var sumSeries = new LineSeries { Title = "Sum of Components" };
 
-            foreach (var point in sumOfAllComponents)
+            // For each key/value pair in the sample for that component
+            foreach (var x in sumOfWavesSamples)
             {
-                sumSeries.Points.Add(new DataPoint(point.Key, point.Value));
+                // Stop plotting points past the proportion we want visible
+                if (x.Key > SignalDuration * SignalProportionVisible)
+                {
+                    break;
+                }
+                sumSeries.Points.Add(new DataPoint(x.Key, x.Value));
             }
-
             plotModel.Series.Add(sumSeries);
 
             // Update the plot
             timeDomainView.InvalidatePlot();
 
             // Create time-domain data array
-            double[] timeDomainData = sumOfAllComponents.Values.ToArray();
+            double[] timeDomainData = sumOfWavesSamples.Values.ToArray();
 
             // Perform FFT
             PerformFFTWithMathNet(timeDomainData);
+        }
+
+        
+        public void UpdateWaveComponentSamples(SineWaveComponent wave)
+        {
+            wave.WaveComponentSamples.Clear();
+            double y;
+            for (double x = 0; x < SignalDuration; x += 1.0 / sampleRate)
+            {
+                y = wave.Magnitude * Math.Sin((2 * Math.PI * wave.Frequency * x) + wave.Phase);
+                wave.WaveComponentSamples[x] = y;
+            }
+        }
+
+        public void ComputeSumOfSamples()
+        {
+            sumOfWavesSamples.Clear();
+            Random random = new Random();
+            double randomDouble;
+            foreach(var component in sineWaveComponents)
+            {
+                foreach (var x in component.WaveComponentSamples)
+                {
+                    randomDouble = (random.NextDouble() -0.5) * SignalNoise;
+                    if (sumOfWavesSamples.ContainsKey(x.Key))
+                    {
+                        sumOfWavesSamples[x.Key] += x.Value;
+                        sumOfWavesSamples[x.Key] += randomDouble;
+                    }
+                    else
+                    {
+                        sumOfWavesSamples[x.Key] = x.Value;
+                        sumOfWavesSamples[x.Key] += randomDouble;
+                    }
+                }
+            }
         }
 
         public void PerformFFTWithMathNet(double[] timeDomainData)
@@ -211,7 +315,7 @@ namespace fft_demo_wpf
             var complexNumbers = timeDomainData.Select(t => new Complex32((float)t, 0)).ToArray();
 
             // Perform FFT using MathNet.Numerics
-            Fourier.Forward(complexNumbers, FourierOptions.Default);
+            Fourier.Forward(complexNumbers, FourierOptions.NoScaling);
 
             // Convert the results to a format suitable for your plotting library
             var frequencyDomainData = complexNumbers.Select(c => c.Magnitude).ToArray();
@@ -228,9 +332,13 @@ namespace fft_demo_wpf
             var plotModel = frequencyDomainView.Model;
             var series = new LineSeries { Title = "FFT Result" };
 
-            for (int i = 0; i < frequencyData.Length; i++) // We only need half of the array
+            for (int i = 0; i < frequencyData.Length; i++)
             {
-                series.Points.Add(new DataPoint(i / SignalDuration, frequencyData[i]));
+                if (i / SignalDuration > 1000)
+                {
+                    break;
+                }
+                series.Points.Add(new DataPoint(i / SignalDuration, frequencyData[i] * (2.0 / frequencyData.Length)));
             }
 
             plotModel.Series.Clear();
@@ -243,6 +351,7 @@ namespace fft_demo_wpf
         public double Frequency { get; set; }
         public double Magnitude { get; set; }
         public double Phase { get; set; }
+        public Dictionary<double, double> WaveComponentSamples { get; set; } = new Dictionary<double, double>();
 
         public override string ToString()
         {
