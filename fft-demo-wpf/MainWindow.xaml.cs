@@ -18,6 +18,7 @@ using MathNet.Numerics;
 using MathNet.Numerics.IntegralTransforms;
 using OxyPlot.Axes;
 using System.ComponentModel;
+using Microsoft.Win32.SafeHandles;
 
 namespace fft_demo_wpf
 {
@@ -31,6 +32,10 @@ namespace fft_demo_wpf
 
         // Contains Samples of a waveform defined as the sum of each individual wave component
         public static Dictionary<double, double> sumOfWavesSamples = new Dictionary<double, double>();
+        // Contains All noise data
+        public static Dictionary<double, double> signalNoiseData = new Dictionary<double, double>();
+
+        private Random random = new Random();
         public static double SignalDuration { get; set; } = 0.5;
         public static double SignalProportionVisible { get; set; } = 0.1;
         public static double SignalNoise { get; set; } = 0.0;
@@ -41,6 +46,7 @@ namespace fft_demo_wpf
         public MainWindow()
         {
             InitializeComponent();
+            GenerateNoise();
 
             // Time-Domain Graph
             PlotModel timeDomainModel = new PlotModel { Title = "Time-Domain" };
@@ -202,6 +208,14 @@ namespace fft_demo_wpf
             }
         }
 
+        private void ApplyNoise_Click(object sender, RoutedEventArgs e)
+        {
+            GenerateNoise();
+            UpdateGlobalProperties();
+            UpdateSelectedComponent();
+            RenderTimeDomainWaveForm();
+        }
+
 
         private void UpdateGlobalProperties()
         {
@@ -288,24 +302,29 @@ namespace fft_demo_wpf
         public void ComputeSumOfSamples()
         {
             sumOfWavesSamples.Clear();
-            Random random = new Random();
-            double randomDouble;
             foreach(var component in sineWaveComponents)
             {
                 foreach (var x in component.WaveComponentSamples)
                 {
-                    randomDouble = (random.NextDouble() -0.5) * SignalNoise;
                     if (sumOfWavesSamples.ContainsKey(x.Key))
                     {
                         sumOfWavesSamples[x.Key] += x.Value;
-                        sumOfWavesSamples[x.Key] += randomDouble;
+                        sumOfWavesSamples[x.Key] += signalNoiseData[x.Key];
                     }
                     else
                     {
                         sumOfWavesSamples[x.Key] = x.Value;
-                        sumOfWavesSamples[x.Key] += randomDouble;
+                        sumOfWavesSamples[x.Key] += signalNoiseData[x.Key];
                     }
                 }
+            }
+        }
+
+        public void GenerateNoise()
+        {
+            for (double x = 0; x < noiseSlider.Maximum; x += 1.0 / sampleRate)
+            {
+                signalNoiseData[x] = (random.NextDouble() -0.5) * SignalNoise;
             }
         }
 

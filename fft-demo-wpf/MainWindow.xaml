@@ -11,7 +11,6 @@
         <!--Main Grid Column Definitions-->
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="3*"/>
-            <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="8*"/>
         </Grid.ColumnDefinitions>
 
@@ -19,6 +18,8 @@
         <Grid Grid.Column="0">
             <!--Row Definition for First Column-->
             <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="*"/>
@@ -42,42 +43,81 @@
                     <Button Content="Delete" Click="DeleteComponent_Click" Grid.Row="1"/>
                 </Grid>
             </Grid>
-            
+
 
             <!-- Frequency Adjustments -->
-            <Slider x:Name="frequencySlider" Minimum="0" Maximum="1000" Value="1" TickFrequency="1" Grid.Row="1" IsSnapToTickEnabled="True"/>
+            <Grid Grid.Row="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Label Content="Frequency" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <Slider x:Name="frequencySlider" Minimum="0" Maximum="1000" Value="1" TickFrequency="1" Grid.Row="1" IsSnapToTickEnabled="True" />
+            </Grid>
 
 
             <!-- Magnitude Adjustments -->
-            <Slider x:Name="magnitudeSlider" Minimum="0" Maximum="5" Value="1" TickFrequency="0.1" Grid.Row="2"/>
+            <Grid Grid.Row="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Label Content="Magnitude" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <Slider x:Name="magnitudeSlider" Minimum="0" Maximum="5" Value="1" TickFrequency="0.1" Grid.Row="1"/>
+            </Grid>
 
             <!-- Phase Adjustments -->
-            <Slider x:Name="phaseSlider" Minimum="0" Maximum="10" Value="0" TickFrequency="0.1" Grid.Row="3"/>
+            <Grid Grid.Row="3">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Label Content="Phase" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <Slider x:Name="phaseSlider" Minimum="0" Maximum="10" Value="0" TickFrequency="0.1" Grid.Row="1"/>
+            </Grid>
+
+            <!-- Zoom Adjustments -->
+            <Grid Grid.Row="4">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Label Content="Zoom" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <Slider x:Name="proportionVisibleSlider" Grid.Row="1" Maximum="1" Minimum="0.01" Value="0.1" LargeChange="0.1" IsDirectionReversed="True" />
+            </Grid>
+
+            <!-- Zoom Adjustments -->
+            <Grid Grid.Row="5">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Label Content="Duration" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <Slider x:Name="durationSlider" Minimum="0.001" Maximum="1" Value="0.5" TickFrequency="0.1" Grid.Row="1" LargeChange="0.01"/>
+            </Grid>
 
             <!-- Static Injection -->
-            <Slider x:Name="noiseSlider" Minimum="0" Maximum="100" Value="0" Grid.Row="4" LargeChange="0.5" />
+            <Grid Grid.Row="6">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Content="Static" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    <Button x:Name="applyNoise" Content="Apply Noise" Click="ApplyNoise_Click" Grid.Column="1" />
+                </Grid>
+                <Slider x:Name="noiseSlider" Minimum="0" Maximum="100" Value="0" LargeChange="0.5" Grid.Row="1" />
 
-        </Grid>
-
-        <!--Second Column-->
-        <Grid Grid.Column="1">
-            <!--Row Definitions For Second Column-->
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-
-            <!-- Preview Zoom Adjustments -->
-            <Slider x:Name="proportionVisibleSlider" Orientation="Vertical" Maximum="1" Minimum="0.01" Value="0.1" LargeChange="0.1" />
-
-            <!-- Signal Duration Adjustments -->
-
-            <Slider x:Name="durationSlider" Minimum="0.001" Maximum="1" Value="0.5" TickFrequency="0.1" Grid.Row="1" Orientation="Vertical" LargeChange="0.01"/>
+            </Grid>
 
         </Grid>
 
         <!--Third Column-->
-        <Grid Grid.Column="2">
+        <Grid Grid.Column="1">
             <!--Row Definitions For Third Column-->
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
