@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 
 namespace fft_demo_wpf.ViewModels
 {
-    internal class GraphViewModel
+    //TimeDomainDataArray FrequencyDomainDataDoubleArray
+    //UpdateDataAndGraphs() RenderTimeDomainWaveForm()
+    internal class GraphViewModel : BaseViewModel
     {
     }
 }
