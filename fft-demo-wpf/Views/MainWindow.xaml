@@ -47,7 +47,7 @@
                     <Button Content="Delete" Click="DeleteComponent_Click" Grid.Row="1"/>
                 </Grid>
             </Grid>
-            
+
             <!-- Export & Playback -->
             <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
@@ -66,7 +66,7 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <Label Content="Frequency" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                <Slider x:Name="frequencySlider" Minimum="0" Maximum="1000" Value="1" TickFrequency="1" Grid.Row="1" IsSnapToTickEnabled="True" />
+                <Slider x:Name="frequencySlider" Minimum="0" Maximum="1000" Value="250" TickFrequency="1" Grid.Row="1" IsSnapToTickEnabled="True" />
             </Grid>
 
 
@@ -77,17 +77,21 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <Label Content="Magnitude" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                <Slider x:Name="magnitudeSlider" Minimum="0" Maximum="5" Value="1" TickFrequency="0.1" Grid.Row="1"/>
+                <Slider x:Name="magnitudeSlider" Minimum="0" Maximum="5" Value="2" TickFrequency="0.1" Grid.Row="1"/>
             </Grid>
 
             <!-- Phase Adjustments -->
             <Grid Grid.Row="4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="89*"/>
+                    <ColumnDefinition Width="130*"/>
+                </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <Label Content="Phase" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                <Slider x:Name="phaseSlider" Minimum="0" Maximum="10" Value="0" TickFrequency="0.1" Grid.Row="1"/>
+                <Label Content="Phase" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="1" />
+                <Slider x:Name="phaseSlider" Minimum="0" Maximum="10" Value="0" TickFrequency="0.1" Grid.Row="1" Grid.ColumnSpan="2"/>
             </Grid>
 
             <!-- Zoom Adjustments -->

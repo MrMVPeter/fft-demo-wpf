@@ -31,10 +31,5 @@ namespace fft_demo_wpf.Models
                 WaveComponentSamples[i] = y;
             }
         }
-
-        public override string ToString()
-        {
-            return $"F:{Frequency:F1}, M{Magnitude:F1}, P{Phase:F1}";
-        }
     }
 }

@@ -10,7 +10,7 @@ namespace fft_demo_wpf.ViewModels
 {
     //Frequency Magnitude Magnitude
     //GenerateSamples() UpdateSelectedComponent()
-    internal class WaveComponentViewModel : BaseViewModel
+    public class WaveComponentViewModel : BaseViewModel
     {
         private SineWaveComponent _sineWaveComponent;
 
@@ -75,6 +75,11 @@ namespace fft_demo_wpf.ViewModels
         {
             _sineWaveComponent.GenerateSamples(signalDuration, sampleRate);
             OnPropertyChanged(nameof(WaveComponentSamples));
+        }
+
+        public override string ToString()
+        {
+            return $"F:{Frequency:F1}, M{Magnitude:F1}, P{Phase:F1}";
         }
     }
 }
