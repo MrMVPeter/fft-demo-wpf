@@ -38,9 +38,9 @@ namespace fft_demo_wpf
         public static Double[] frequencyDomainDataDoubleArray;
 
         // SignalViewModel properties
-        public double SignalDuration  => ((MainViewModel)DataContext).SignalViewModel.SignalDuration;
-        public double SignalProportionVisible => ((MainViewModel)DataContext).SignalViewModel.SignalProportionVisible;
-        public double SignalNoise => ((MainViewModel)DataContext).SignalViewModel.SignalNoise;
+        public double SignalDuration  => ((MainViewModel)DataContext).SignalViewModel.SignalData.SignalDuration;
+        public double SignalProportionVisible => ((MainViewModel)DataContext).SignalViewModel.SignalData.SignalProportionVisible;
+        public double SignalNoise => ((MainViewModel)DataContext).SignalViewModel.SignalData.SignalNoise;
         // GraphViewModel properties
         public PlotModel TimeDomainModel => ((MainViewModel)DataContext).GraphViewModel.TimeDomainModel;
         public PlotModel FrequencyDomainModel => ((MainViewModel)DataContext).GraphViewModel.FrequencyDomainModel;
@@ -53,20 +53,12 @@ namespace fft_demo_wpf
             InitializeComponent();
 
             // Initialize noise data (all 0s)
-            ((MainViewModel)DataContext).SignalViewModel.GenerateNoise(1, 8000);
+            ((MainViewModel)DataContext).SignalViewModel.SignalData.GenerateNoise();
 
             // Add initial wave component and select it
-            var initialWaveComponent = new SineWaveComponent();
-            var initialWaveComponentViewModel = new WaveComponentViewModel(initialWaveComponent);
-            WaveComponentViewModels.Add(initialWaveComponentViewModel);
+            ((MainViewModel)DataContext).SignalViewModel.AddWaveComponent();
             sineWaveComponentList.ItemsSource = WaveComponentViewModels;
-            sineWaveComponentList.SelectedItem = initialWaveComponentViewModel;
-
-            // Time-Domain graph
-            timeDomainView.Model = TimeDomainModel;
-
-            // Freq-Domain graph
-            frequencyDomainView.Model = FrequencyDomainModel;
+            sineWaveComponentList.SelectedItem = WaveComponentViewModels.FirstOrDefault();
 
             // setup slider event handlers
             frequencySlider.ValueChanged += FrequencySlider_ValueChanged;
@@ -79,6 +71,12 @@ namespace fft_demo_wpf
             // Generate data and paint data
             UpdateSelectedWaveComponentSamples();
             UpdateDataAndGraphs();
+
+            // Time-Domain graph
+            timeDomainView.Model = TimeDomainModel;
+            
+            // Freq-Domain graph
+            frequencyDomainView.Model = FrequencyDomainModel;
         }
 
         private void FrequencySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -119,19 +117,19 @@ namespace fft_demo_wpf
 
         private void DurationSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            ((MainViewModel)DataContext).SignalViewModel.SignalDuration = durationSlider.Value;
+            ((MainViewModel)DataContext).SignalViewModel.SignalData.SignalDuration = durationSlider.Value;
             UpdateAllWaveComponentSamples();
             UpdateDataAndGraphs();
         }
         private void ProportionVisible_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            ((MainViewModel)DataContext).SignalViewModel.SignalProportionVisible = proportionVisibleSlider.Value;
+            ((MainViewModel)DataContext).SignalViewModel.SignalData.SignalProportionVisible = proportionVisibleSlider.Value;
             UpdateAllWaveComponentSamples();
             UpdateDataAndGraphs();
         }
         private void NoiseSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            ((MainViewModel)DataContext).SignalViewModel.SignalNoise = noiseSlider.Value;
+            ((MainViewModel)DataContext).SignalViewModel.SignalData.SignalNoise = noiseSlider.Value;
             UpdateAllWaveComponentSamples();
             UpdateDataAndGraphs();
         }
@@ -155,16 +153,17 @@ namespace fft_demo_wpf
 
         private void AddComponent_Click(object sender, RoutedEventArgs e)
         {
-            WaveComponentViewModel newComponent = new WaveComponentViewModel(new SineWaveComponent());
+            //WaveComponentViewModel newComponent = new WaveComponentViewModel(new SineWaveComponent());
 
-            // Add the new component to the list
-            WaveComponentViewModels.Add(newComponent);
+            //// Add the new component to the list
+            //WaveComponentViewModels.Add(newComponent);
 
-            // Refresh the ListBox
-            sineWaveComponentList.Items.Refresh();
+            //// Refresh the ListBox
+            //sineWaveComponentList.Items.Refresh();
 
-            // Select the newly added component
-            sineWaveComponentList.SelectedItem = newComponent;
+            //// Select the newly added component
+            //sineWaveComponentList.SelectedItem = newComponent;
+            ((MainViewModel)DataContext).SignalViewModel.AddWaveComponent();
 
             // Create data samples for new component
             UpdateSelectedWaveComponentSamples();
@@ -205,55 +204,19 @@ namespace fft_demo_wpf
 
         private void ApplyNoise_Click(object sender, RoutedEventArgs e)
         {
-            ((MainViewModel)DataContext).SignalViewModel.GenerateNoise(1, 8000);
+            ((MainViewModel)DataContext).SignalViewModel.SignalData.GenerateNoise();
             UpdateDataAndGraphs();
         }
 
         public void UpdateDataAndGraphs()
         {
-            ComputeSumOfSamples();
-            RenderTimeDomainWaveForm();
-            PerformFFTWithMathNet(timeDomainDataArray);
-            UpdateFrequencyDomainGraph(frequencyDomainDataDoubleArray);
-        }
-
-        private void RenderTimeDomainWaveForm()
-        {
-            TimeDomainModel.Series.Clear();
-            int numSamplesToPlot = (int)(SignalDuration * SignalProportionVisible * sampleRate);
-
-            // Plot Individual Components
-            foreach (var component in WaveComponentViewModels)
-            {
-                var series = new LineSeries { Title = $"Frequency: {component.Frequency:F1} Hz" };
-                series.Color = OxyColor.FromArgb(10, 0, 0, 0);
-
-                // Add each sample to the series
-                for (int i = 0; i < numSamplesToPlot; i++)
-                {
-                    double x = (double)i / sampleRate;
-                    double y = component.WaveComponentSamples[i];
-                    series.Points.Add(new DataPoint(x, y));
-                }
-                // Add series to graph
-                TimeDomainModel.Series.Add(series);
-            }
-
-            // Plot Aggregate Waveform
-            var sumSeries = new LineSeries { Title = "Sum of Components" };
-
-            for (int i = 0; i < numSamplesToPlot; i++)
-            {
-                double x = (double)i / sampleRate;
-                double y = timeDomainDataArray[i];
-                sumSeries.Points.Add(new DataPoint(x, y));
-            }
-            TimeDomainModel.Series.Add(sumSeries);
-
-            // Update the plot
+            ((MainViewModel)DataContext).SignalViewModel.ComputeSumOfSamples();
+            ((MainViewModel)DataContext).GraphViewModel.RenderTimeDomainWaveForm();
+            ((MainViewModel)DataContext).SignalViewModel.SignalData.PerformFFTWithMathNet();
+            ((MainViewModel)DataContext).GraphViewModel.UpdateFrequencyDomainGraph();
             timeDomainView.InvalidatePlot();
+            frequencyDomainView.InvalidatePlot();
         }
-
         
         public void UpdateSelectedWaveComponentSamples()
         {
@@ -267,53 +230,6 @@ namespace fft_demo_wpf
             {
                 sineWaveComponent.GenerateSamples(SignalDuration, sampleRate);
             }
-        }
-
-        public void ComputeSumOfSamples()
-        {
-            int numSamples = (int)(SignalDuration * sampleRate);
-            timeDomainDataArray = new double[numSamples];
-            foreach(var component in WaveComponentViewModels)
-            {
-                for (int i = 0; i < numSamples; i++)
-                {
-                    timeDomainDataArray[i] += component.WaveComponentSamples[i] + ((MainViewModel)DataContext).SignalViewModel.SignalNoiseData[i];
-                }
-            }
-        }
-
-        public void PerformFFTWithMathNet(double[] timeDomainData)
-        {
-            // Convert to MathNet Numerics data type
-            var complexNumbers = timeDomainData.Select(t => new Complex32((float)t, 0)).ToArray();
-
-            // Perform FFT using MathNet.Numerics
-            Fourier.Forward(complexNumbers, FourierOptions.NoScaling);
-
-            // Convert the results to a format suitable for your plotting library
-            var frequencyDomainData = complexNumbers.Select(c => c.Magnitude).ToArray();
-
-            // Convert float[] to double[]
-            frequencyDomainDataDoubleArray = Array.ConvertAll(frequencyDomainData, x => (double)x);
-        }
-
-        private void UpdateFrequencyDomainGraph(double[] frequencyData)
-        {
-            var series = new LineSeries { Title = "FFT Result" };
-
-            for (int i = 0; i < frequencyData.Length; i++)
-            {
-                // Stop plotting past the max frequency of 1000
-                if (i / SignalDuration > 1000)
-                {
-                    break;
-                }
-                series.Points.Add(new DataPoint(i / SignalDuration, frequencyData[i] * (2.0 / frequencyData.Length)));
-            }
-
-            FrequencyDomainModel.Series.Clear();
-            FrequencyDomainModel.Series.Add(series);
-            frequencyDomainView.InvalidatePlot();
-        }
+        }        
     }
 }

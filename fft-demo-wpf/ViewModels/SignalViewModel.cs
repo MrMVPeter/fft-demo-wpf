@@ -4,40 +4,24 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace fft_demo_wpf.ViewModels
 {
     public class SignalViewModel : BaseViewModel
     {
-        private readonly Random random = new Random();
-
-        public double[] SignalNoiseData { get; set; }
-
-        private double _signalDuration;
-        private double _signalProportionVisible;
-        private double _signalNoise;
-
-        public double SignalDuration
+        // Expose SignalData Model and it's attributes
+        private SignalData _signalData;
+        public SignalData SignalData
         {
-            get { return _signalDuration; }
-            set { SetProperty(ref _signalDuration, value); }
+            get { return _signalData; }
+            set { SetProperty(ref _signalData, value); }
         }
 
-        public double SignalProportionVisible
-        {
-            get { return _signalProportionVisible; }
-            set { SetProperty(ref _signalProportionVisible, value); }
-        }
-
-        public double SignalNoise
-        {
-            get { return _signalNoise; }
-            set { SetProperty(ref _signalNoise, value); }
-        }
-
-        private ObservableCollection<SineWaveComponent> _sineWaveComponents;
-        public ObservableCollection<SineWaveComponent> SineWaveComponents
+        // Expose collection of SineWaveComponents and their attributes
+        private ObservableCollection<WaveComponentViewModel> _sineWaveComponents;
+        public ObservableCollection<WaveComponentViewModel> SineWaveComponents
         {
             get => _sineWaveComponents;
             set
@@ -50,31 +34,43 @@ namespace fft_demo_wpf.ViewModels
             }
         }
 
-        
-
-        public SignalViewModel()
+        public SignalViewModel(ObservableCollection<WaveComponentViewModel> waveComponentViewModels)
         {
             // Initialize with default values
-            _signalDuration = 0.5;
-            _signalProportionVisible = 0.1;
-            _signalNoise = 0.0;
-
-            SineWaveComponents = new ObservableCollection<SineWaveComponent>();
+            SineWaveComponents = waveComponentViewModels;
+            SignalData = new SignalData();
         }
 
-        public void GenerateNoise(int sampleRate, double maxNoise)
+        public void AddWaveComponent()
         {
-            int numSamples = (int)(maxNoise * sampleRate);
-            SignalNoiseData = new double[numSamples];
-            for (int i = 0; i < numSamples; i++)
-            {
-                SignalNoiseData[i] = (random.NextDouble() - 0.5) * SignalNoise;
-            }
+            // Create a new wave component for the Model
+            var newComponent = new SineWaveComponent();
+            SignalData.SineWaveComponents.Add(newComponent);
+            int count = SignalData.SineWaveComponents.Count;
+            SignalData.SineWaveComponents[count - 1].GenerateSamples(SignalData.SignalDuration, SignalData.SampleRate);
+
+            // Create a new ViewModel for this component
+            WaveComponentViewModel newComponentViewModel = new WaveComponentViewModel(newComponent);
+            SineWaveComponents.Add(newComponentViewModel);
         }
 
-        public void UpdateGlobalProperties()
-        {
 
+        public void GenerateNoise()
+        {
+            _signalData.GenerateNoise();
+            OnPropertyChanged(nameof(SignalData));
+        }
+
+        public void ComputeSumOfSamples()
+        {
+            _signalData.ComputeSumOfSamples();
+            OnPropertyChanged(nameof(SignalData));
+        }
+
+        public void PerformFFTWithMathNet()
+        {
+            _signalData.PerformFFTWithMathNet();
+            OnPropertyChanged(nameof(SignalData));
         }
     }
 }

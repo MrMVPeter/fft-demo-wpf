@@ -40,9 +40,9 @@ namespace fft_demo_wpf.ViewModels
         public MainViewModel()
         {
             //Initialize Sub-ViewModels
-            SignalViewModel = new SignalViewModel();
-            GraphViewModel = new GraphViewModel();
             WaveComponentViewModels = new ObservableCollection<WaveComponentViewModel>();
+            SignalViewModel = new SignalViewModel(WaveComponentViewModels);
+            GraphViewModel = new GraphViewModel(SignalViewModel, WaveComponentViewModels);
         }
     }
 }
