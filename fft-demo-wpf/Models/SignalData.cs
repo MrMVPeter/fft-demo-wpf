@@ -48,12 +48,20 @@ namespace fft_demo_wpf.Models
         {
             int numSamples = (int)(SignalDuration * SampleRate);
             TimeDomainDataArray = new double[numSamples];
-            foreach (var component in SineWaveComponents)
+            //foreach (var component in SineWaveComponents)
+            //{
+            //    for (int i = 0; i < numSamples; i++)
+            //    {
+            //        TimeDomainDataArray[i] += component.WaveComponentSamples[i];
+            //    }
+            //}
+            for (int i = 0; i < numSamples; i++)
             {
-                for (int i = 0; i < numSamples; i++)
+                foreach (var component in SineWaveComponents)
                 {
                     TimeDomainDataArray[i] += component.WaveComponentSamples[i];
                 }
+                TimeDomainDataArray[i] += SignalNoiseData[i];
             }
         }
 

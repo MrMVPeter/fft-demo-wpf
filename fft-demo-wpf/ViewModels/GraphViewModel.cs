@@ -9,6 +9,7 @@ using OxyPlot;
 using OxyPlot.Series;
 using OxyPlot.Axes;
 using System.Collections.ObjectModel;
+using fft_demo_wpf.Models;
 
 namespace fft_demo_wpf.ViewModels
 {
@@ -107,7 +108,7 @@ namespace fft_demo_wpf.ViewModels
             foreach (var component in _waveComponentViewModels)
             {
                 var series = new LineSeries { Title = $"Frequency: {component.Frequency:F1} Hz" };
-                series.Color = OxyColor.FromArgb(10, 0, 0, 0);
+                series.Color = OxyColor.FromArgb(20, 0, 0, 0);
 
                 // Add each sample to the series
                 for (int i = 0; i < numSamplesToPlot; i++)

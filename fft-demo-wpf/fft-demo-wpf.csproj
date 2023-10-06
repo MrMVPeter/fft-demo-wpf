@@ -218,6 +218,7 @@
     </ApplicationDefinition>
     <Compile Include="Models\SignalData.cs" />
     <Compile Include="Utils\FFTCalculator.cs" />
+    <Compile Include="Utils\RelayCommand.cs" />
     <Compile Include="ViewModels\BaseViewModel.cs" />
     <Compile Include="ViewModels\GraphViewModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />

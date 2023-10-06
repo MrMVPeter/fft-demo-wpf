@@ -37,7 +37,8 @@
                     <ColumnDefinition Width="2*"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <ListBox x:Name="sineWaveComponentList" SelectionChanged="SineWaveComponentList_SelectionChanged" Grid.Column="0"/>
+                <!--<ListBox x:Name="sineWaveComponentList" SelectionChanged="SineWaveComponentList_SelectionChanged" Grid.Column="0"/>-->
+                <ListBox x:Name="sineWaveComponentList" SelectionChanged="SineWaveComponentList_SelectionChanged" ItemsSource="{Binding WaveComponentViewModels}" SelectedItem="{Binding SelectedComponent}" Grid.Column="0"/>
                 <Grid Grid.Column="1">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
@@ -66,7 +67,8 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <Label Content="Frequency" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                <Slider x:Name="frequencySlider" Minimum="0" Maximum="1000" Value="250" TickFrequency="1" Grid.Row="1" IsSnapToTickEnabled="True" />
+                <Slider x:Name="frequencySlider" Minimum="0" Maximum="1000" Value="250" TickFrequency="1" Grid.Row="1" IsSnapToTickEnabled="True"
+                        ValueChanged="FrequencySlider_ValueChanged"/>
             </Grid>
 
 

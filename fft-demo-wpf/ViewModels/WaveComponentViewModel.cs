@@ -66,6 +66,12 @@ namespace fft_demo_wpf.ViewModels
             }
         }
 
+        // Returns the underlying Model, important for synchronization
+        public SineWaveComponent UnderlyingModel
+        {
+            get => _sineWaveComponent;
+        }
+
         public WaveComponentViewModel(SineWaveComponent sineWaveComponent)
         {
             _sineWaveComponent = sineWaveComponent ?? throw new ArgumentNullException(nameof(sineWaveComponent));

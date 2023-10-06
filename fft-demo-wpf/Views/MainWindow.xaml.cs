@@ -52,16 +52,20 @@ namespace fft_demo_wpf
         {
             InitializeComponent();
 
+            var viewModel = new MainViewModel();
+            DataContext = viewModel;
+
+            viewModel.PropertyChanged += ViewModel_PropertyChanged;
+
             // Initialize noise data (all 0s)
             ((MainViewModel)DataContext).SignalViewModel.SignalData.GenerateNoise();
 
             // Add initial wave component and select it
             ((MainViewModel)DataContext).SignalViewModel.AddWaveComponent();
-            sineWaveComponentList.ItemsSource = WaveComponentViewModels;
+            //sineWaveComponentList.ItemsSource = WaveComponentViewModels;
             sineWaveComponentList.SelectedItem = WaveComponentViewModels.FirstOrDefault();
 
             // setup slider event handlers
-            frequencySlider.ValueChanged += FrequencySlider_ValueChanged;
             magnitudeSlider.ValueChanged += MagnitudeSlider_ValueChanged;
             phaseSlider.ValueChanged += PhaseSlider_ValueChanged;
             durationSlider.ValueChanged += DurationSlider_ValueChanged;
@@ -79,10 +83,26 @@ namespace fft_demo_wpf
             frequencyDomainView.Model = FrequencyDomainModel;
         }
 
+        private void ViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            var viewModel = sender as MainViewModel;
+            if (viewModel == null) return;
+
+            if (e.PropertyName == nameof(MainViewModel.ShouldInvalidatePlot))
+            {
+                if (viewModel.ShouldInvalidatePlot)
+                {
+                    timeDomainView.InvalidatePlot();
+                    frequencyDomainView.InvalidatePlot();
+                    viewModel.ShouldInvalidatePlot = false;
+                }
+            }
+        }
+
         private void FrequencySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             var selectedComponent = sineWaveComponentList.SelectedItem as WaveComponentViewModel;
-            if (!isNewComponentSelected && selectedComponent != null) 
+            if (!isNewComponentSelected && selectedComponent != null)
             {
                 selectedComponent.Frequency = frequencySlider.Value;
                 sineWaveComponentList.Items.Refresh();
@@ -153,17 +173,10 @@ namespace fft_demo_wpf
 
         private void AddComponent_Click(object sender, RoutedEventArgs e)
         {
-            //WaveComponentViewModel newComponent = new WaveComponentViewModel(new SineWaveComponent());
-
-            //// Add the new component to the list
-            //WaveComponentViewModels.Add(newComponent);
-
-            //// Refresh the ListBox
-            //sineWaveComponentList.Items.Refresh();
-
-            //// Select the newly added component
-            //sineWaveComponentList.SelectedItem = newComponent;
+            // Select the newly added component
             ((MainViewModel)DataContext).SignalViewModel.AddWaveComponent();
+            var count = ((MainViewModel)DataContext).SignalViewModel.SineWaveComponentViewModels.Count;
+            sineWaveComponentList.SelectedItem = ((MainViewModel)DataContext).SignalViewModel.SineWaveComponentViewModels[count - 1];
 
             // Create data samples for new component
             UpdateSelectedWaveComponentSamples();
@@ -177,29 +190,14 @@ namespace fft_demo_wpf
             // Get the currently selected component
             var selectedComponent = sineWaveComponentList.SelectedItem as WaveComponentViewModel;
 
-            // Check if a component is selected
-            if (selectedComponent != null)
+            ((MainViewModel)DataContext).SignalViewModel.RemoveWaveComponent(selectedComponent);
+            var count = ((MainViewModel)DataContext).SignalViewModel.SineWaveComponentViewModels.Count;
+            if (count != 0)
             {
-                // Remove the selected component from the list
-                WaveComponentViewModels.Remove(selectedComponent);
-
-                // Select the first compnent to ensure selected is not NULL
-                if (WaveComponentViewModels.Count != 0)
-                {
-                    sineWaveComponentList.SelectedItem = WaveComponentViewModels[0];
-                }
-
-                // Refresh the ListBox
-                sineWaveComponentList.Items.Refresh();
-
-                // Update the graphs
-                UpdateDataAndGraphs();
+                sineWaveComponentList.SelectedItem = ((MainViewModel)DataContext).SignalViewModel.SineWaveComponentViewModels[count - 1];
             }
-            else
-            {
-                // Show a message if no component is selected
-                MessageBox.Show("Please select a component to delete.");
-            }
+
+            UpdateDataAndGraphs();
         }
 
         private void ApplyNoise_Click(object sender, RoutedEventArgs e)
@@ -210,10 +208,7 @@ namespace fft_demo_wpf
 
         public void UpdateDataAndGraphs()
         {
-            ((MainViewModel)DataContext).SignalViewModel.ComputeSumOfSamples();
-            ((MainViewModel)DataContext).GraphViewModel.RenderTimeDomainWaveForm();
-            ((MainViewModel)DataContext).SignalViewModel.SignalData.PerformFFTWithMathNet();
-            ((MainViewModel)DataContext).GraphViewModel.UpdateFrequencyDomainGraph();
+            ((MainViewModel)DataContext).UpdateDataAndGraphs();
             timeDomainView.InvalidatePlot();
             frequencyDomainView.InvalidatePlot();
         }
